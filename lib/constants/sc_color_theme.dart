@@ -1,4 +1,5 @@
 import 'package:admin_securechat/constants/constants_exports.dart';
+export 'package:admin_securechat/constants/sc_color_theme.dart';
 import 'dart:ui';
 
 class SCColorTheme {
@@ -15,6 +16,7 @@ class SCColorTheme {
   //normal color list
   Color get white => const Color(0xFFFFFFFF);
   Color get black => const Color(0xFF000000);
+  Color get transparent => const Color(0x0000ffff);
 
   //Neutral Colors
   Color get neutral50 => const Color(0xFFFAFAFA);

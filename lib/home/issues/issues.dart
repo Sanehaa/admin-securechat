@@ -1,49 +1,40 @@
-import 'package:admin_securechat/home/issues/issues.dart';
+import 'package:admin_securechat/home/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:admin_securechat/constants/constants_exports.dart';
-import 'package:admin_securechat/constants/widgets/data_containers.dart';
-import 'package:admin_securechat/home/dashboard_service.dart';
+import 'package:admin_securechat/home/issues/issue_service.dart';
 
-class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+class Issues extends StatefulWidget {
+  const Issues({Key? key}) : super(key: key);
 
   @override
-  State<Dashboard> createState() => _DashboardState();
+  State<Issues> createState() => _IssuesState();
 }
 
-class _DashboardState extends State<Dashboard> {
-  int totalUsers = 0;
-  int totalReports =0;
+class _IssuesState extends State<Issues> {
+  final colorTheme = SCColorTheme();
+  final textTheme = SCTextTheme();
+
+  List<Map<String, dynamic>> issueData = []; // List to store issue data
 
   @override
   void initState() {
     super.initState();
-    fetchTotalUsers();
-    fetchTotalReports(); }
-
-  Future<void> fetchTotalUsers() async {
-    try {
-      int total = await DashboardService.getTotalUsers();
-      setState(() {
-        totalUsers = total;
-      });
-    } catch (e) {
-      print('Error fetching total users: $e');
-    }
+    // Call the fetchIssueData method when the widget is initialized
+    fetchIssueData();
   }
 
-  Future<void> fetchTotalReports() async {
+  // Method to fetch issue data
+  Future<void> fetchIssueData() async {
     try {
-      int total = await DashboardService.getTotalReports();
+      List<Map<String, dynamic>> data = await IssueService.getIssueData();
       setState(() {
-        totalReports = total;
+        issueData = data;
       });
     } catch (e) {
-      print('Error fetching total Reports: $e');
+      print('Error fetching issue data: $e');
+      // Handle error if needed
     }
   }
-  final colorTheme = SCColorTheme();
-  final textTheme = SCTextTheme();
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +67,8 @@ class _DashboardState extends State<Dashboard> {
                       Text(
                         'Overview',
                         style: SCTextTheme().heading3.copyWith(
-                              color: SCColorTheme().white,
-                            ),
+                          color: SCColorTheme().white,
+                        ),
                       ),
                     ],
                   ),
@@ -176,66 +167,77 @@ class _DashboardState extends State<Dashboard> {
                         onTap: () {})
                   ]),
                 ),
-               Expanded(
-                  child: SingleChildScrollView(
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, top: 16.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                         Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              //user info container
-                              DataContainer(
-                                title: 'Total Users',
-                                iconData: Icons.supervised_user_circle_outlined,
-                                imagePath: 'assets/images/totnousers.png',
-                                subTitle1: '+2% Since last week',
-                                subTitle2: 'Total number of users: $totalUsers',
+                        Text(
+                          'Email of Users who reported issues in app:',
+                          style: SCTextTheme()
+                              .heading3
+                              .copyWith(color: SCColorTheme().white),
+                          textAlign: TextAlign.start,
+                        ),
+                        SizedBox(height: 8),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0, top: 10, right: 10),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.green),
+                                borderRadius: BorderRadius.circular(20),
+                                color: SCColorTheme().transparent,
                               ),
-
-                              //new registrations
-                              DataContainer(
-                                title: 'New Users Registered',
-                                iconData: Icons.supervised_user_circle_outlined,
-                                imagePath: 'assets/images/newuser.png',
-                                subTitle1: '+6% Since last week',
-                                subTitle2: 'Total number of new users registered: 11',
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: ListView.builder(
+                                  itemCount: issueData.length,
+                                  itemBuilder: (context, index) {
+                                    return Column(
+                                      children: [
+                                        Container(
+                                          color: SCColorTheme().primaryColorBlue600,
+                                          child: ListTile(
+                                            title: Text(
+                                             'Email: ${issueData[index]['userEmail']}',
+                                              style: TextStyle(color: Colors.white),
+                                            ),
+                                            subtitle: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Description: ${issueData[index]['description']}',
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                                Text(
+                                                  'Timestamp: ${issueData[index]['timestamp']}',
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                                Text(
+                                                  'Screenshot URL: ${issueData[index]['screenshotUrl']}',
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                              ],
+                                            ),
+                                            trailing: Transform.rotate(
+                                              angle: 180 * 3.1415926535 / 180,
+                                              child: Icon(Icons.arrow_back_ios_outlined, color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                      ],
+                                    );
+                                  },
+                                ),
                               ),
-
-                               //number of reports
-                               DataContainer(
-                                title: 'Total Report Received',
-                                iconData: Icons.supervised_user_circle_outlined,
-                                imagePath: 'assets/images/reports.png',
-                                subTitle1: '+1% Since last week',
-                                 subTitle2: 'Total number of reports: $totalReports',
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                               DataContainer(
-                                title: 'Active Users',
-                                iconData: Icons.supervised_user_circle_outlined,
-                                imagePath: 'assets/images/analytics.jpg',
-                                subTitle1: 'Total number of Active Users: 11',
-                                 subTitle2: 'Total number of users: $totalUsers',
-                              ),
-                               DataContainer(
-                                title: 'Feedbacks',
-                                iconData: Icons.supervised_user_circle_outlined,
-                                imagePath: 'assets/images/feedbacks.png',
-                                subTitle1: '+2% Since last week',
-                                subTitle2: 'Total number of Feedbacks received: 2',
-                              ),
-                            ],
-                          ),
-                        ),
+
                       ],
                     ),
                   ),
@@ -248,3 +250,5 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 }
+
+
